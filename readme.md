@@ -8,11 +8,13 @@ Clone this repo somewhere in your development machine
 ### 2) Install Python
 install python version >= 3.7.*
 
-### 3) install dotenv package
+### 3) install required python packages
 Homepage: https://pypi.org/project/python-dotenv/
 
-    pip install -U python-dotenv
-    
+`pip install -U python-dotenv`
+
+`pip install python-slugify`
+
 ### 4) copy `d.cmd` to PATH
 update path in `d.cmd` to point `d.py` in this directory.
 
