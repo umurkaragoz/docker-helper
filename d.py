@@ -1,6 +1,6 @@
 # SHORTCUT FOR RUNNING DOCKER COMMANDS
 # author: umurkaragoz
-# version: 1.2
+# version: 1.3
 
 import os
 from dotenv import load_dotenv
@@ -8,17 +8,28 @@ import argparse
 from argparse import RawTextHelpFormatter
 from slugify import slugify
 
+
+# create a help text formatter to reduce help text indentation
+# otherwise it gets indented too much
+# https://stackoverflow.com/a/46554318
+# https://stackoverflow.com/a/25010243
+def less_indent_formatter(prog): return argparse.RawTextHelpFormatter(prog, max_help_position=2)
+
+
 # setup script arguments to accept
-parser = argparse.ArgumentParser(description='`d`: Docker Helper Script', formatter_class=RawTextHelpFormatter)
-parser.add_argument('method', type=str, choices=['u', 'd', 'r', 'c', 's', 'l', 'b'], help="""
-u: up
-d: down
-r: restart
-c: run command
-s: ssh into the container
-l: show container logs
-b: re/build the image
+parser = argparse.ArgumentParser(description='`d`: Docker Helper Script', formatter_class=less_indent_formatter)
+parser.add_argument('method', type=str, choices=['u', 'd', 'r', 'c', 's', 'l', 'b', 'a'], help="""
+b : BUILD     (re)builds project images
+u : UP        starts the project containers in detached mode
+d : DOWN      stops the project containers and clears volumes
+r : RESTART   runs UP and DOWN routines mentioned above
+c : COMMAND   runs specified command in `web` container
+a : ARTISAN   runs Laravel's artisan command in `web` container
+s : SSH       starts SSH session on `web` container
+l : LOGS      shows `web` container logs
+
 """)
+
 parser.add_argument('arguments', type=str, nargs='*', default='')
 
 # parse arguments
@@ -40,7 +51,14 @@ APP_SLUG: str = slugify(APP_NAME, separator="_")
 
 print('DOCKER HELPER')
 # execute one code block according to `method` argument
-if args.method == 'u':
+
+if args.method == 'b':
+	print("BUILD: BUILDING containers")
+	print('-------------')
+	os.system("docker-compose build")
+	print('-------------')
+
+elif args.method == 'u':
 	print(f"UP: running {APP_NAME} project docker containers")
 	print('-------------')
 	os.system("docker-compose up -d")
@@ -60,6 +78,12 @@ elif args.method == 'r':
 	print('-------------')
 	print(f"development server is now live on {APP_URL}")
 
+elif args.method == 's':
+	print("SH: SSH into the web container")
+	print('-------------')
+	os.system(f"docker exec -ti {APP_SLUG} sh")
+	print('-------------')
+
 elif args.method == 'c':
 	print("COMMAND: running COMMAND on web container")
 	command: str = ' '.join(args.arguments)
@@ -68,16 +92,12 @@ elif args.method == 'c':
 	os.system(f"docker-compose exec web {command}")
 	print('-------------')
 
-elif args.method == 's':
-	print("SH: SSH into the web container")
+elif args.method == 'a':
+	print("ARTISAN: running ARTISAN COMMAND on web container")
+	command: str = ' '.join(args.arguments)
+	print(f'ARTISAN: running COMMAND "php artisan {command}" on web container')
 	print('-------------')
-	os.system(f"docker exec -ti {APP_SLUG} sh")
-	print('-------------')
-
-elif args.method == 'b':
-	print("BUILD: BUILDING containers")
-	print('-------------')
-	os.system("docker-compose build")
+	os.system(f"docker-compose exec web php artisan {command}")
 	print('-------------')
 
 elif args.method == 'l':
@@ -91,7 +111,7 @@ elif args.method == 'l':
 	# clear tailing quotes
 	if command[-1] == '"' or command[-1] == "'":
 		command = command[:-1]
-		
+	
 	os.system(f"docker-compose logs {command} web")
 	print('-------------')
 

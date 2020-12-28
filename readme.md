@@ -26,6 +26,8 @@ copy `d.cmd` to a folder within PATH
 First navigate to a project directory which uses **docker-compose**,
 then you can use following commands;
 
+**`d b`** BUILD: (re)builds project images
+
 **`d u`** UP: starts the project containers in detached mode
 
 **`d d`** DOWN: stops the project containers and clears volumes
@@ -33,6 +35,8 @@ then you can use following commands;
 **`d r`** RESTART: runs UP and DOWN routines mentioned above
 
 **`d c [command]`** COMMAND: runs specified command in `web` container
+
+**`d a [command]`** ARTISAN: runs Laravel's artisan command in `web` container
 
 **`d s`** SSH: starts SSH session on `web` container
 
